@@ -1,0 +1,24 @@
+{
+  "totalAprendices": 1,
+  "activos": 0,
+  "inactivos": 0,
+  "graduados": 1,
+  "promedioCostoMatricula": 950000,
+  "costoMaximo": 950000,
+  "costoMinimo": 950000,
+  "generadoEn": "2026-07-29T02:33:27.388Z",
+  "filtroAplicado": "graduado",
+  "aprendicesFiltrados": [
+    {
+      "id": 6,
+      "nombre_completo": "Andrés Felipe Ríos",
+      "documento": "1060789012",
+      "programa_id": 2,
+      "ficha": "2765413",
+      "estado": "graduado",
+      "fecha_ingreso": "2024-01-20",
+      "promedio_acumulado": 4.9,
+      "costo_matricula": 950000
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "name": "week-01-nodejs-fundamentals",
+  "version": "1.0.0",
+  "description": "Semana 1 - Node.js Fundamentals | Bootcamp ExpressJS",
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "packageManager": "pnpm@10.34.5",
+  "scripts": {
+    "dev": "tsx 3-proyecto/starter/src/index.ts",
+    "build": "tsc",
+    "start": "node dist/3-proyecto/starter/src/index.js",
+    "ex01": "tsx 2-practicas/ejercicio-01-hello-node/src/index.ts",
+    "ex02": "tsx 2-practicas/ejercicio-02-async/src/index.ts",
+    "project": "tsx 3-proyecto/starter/src/index.ts"
+  },
+  "keywords": [
+    "nodejs",
+    "typescript",
+    "bootcamp"
+  ],
+  "author": "Tu Nombre",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  }
+}
