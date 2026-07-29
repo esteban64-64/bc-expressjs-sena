@@ -51,6 +51,6 @@ pnpm build
 - pnpm 10.x
 
 ## 👤 Autor
-- Nombre: [Tu nombre]
+- Nombre: Nelson Esteban Mejia Gomez
 - Dominio asignado: SENA Centro de Formación 🏫
 - Fecha: 2026-07-28
