@@ -1,0 +1,19 @@
+{
+  "name": "semana01-sena-centro-formacion",
+  "version": "1.0.0",
+  "description": "Proyecto semanal \u2014 Procesador de datos SENA Centro de Formaci\u00f3n (dominio: SENA)",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc --noEmit",
+    "start": "node dist/src/index.js"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.7.0"
+  },
+  "type": "module"
+}
