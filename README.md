@@ -9,10 +9,10 @@ Entrega de semana 01 para `bc-expressjs`.
 ## Cómo correr
 
 ```bash
-npm install
-npm run dev                  # resumen completo
-npm run dev -- --category activo   # filtrar por estado
-npm run build                # verifica TypeScript estricto
+pnpm install
+pnpm dev                  # resumen completo
+pnpm dev -- --category activo   # filtrar por estado
+pnpm build                # verifica TypeScript estricto
 ```
 
 Genera `output/report.json` con el resumen del catálogo.
