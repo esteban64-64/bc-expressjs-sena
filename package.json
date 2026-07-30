@@ -1,17 +1,25 @@
 {
-  "name": "semana01-sena-centro-formacion",
+  "name": "semana02-sena-express-intro",
   "version": "1.0.0",
-  "description": "Proyecto semanal \u2014 Procesador de datos SENA Centro de Formaci\u00f3n (dominio: SENA)",
+  "description": "Semana 02 - Express Intro | API CRUD SENA Centro de Formaci\u00f3n",
   "engines": {
     "node": ">=22.0.0"
   },
   "packageManager": "pnpm@10.34.5",
   "scripts": {
-    "dev": "tsx src/index.ts",
+    "dev": "tsx src/server.ts",
     "build": "tsc --noEmit",
-    "start": "node dist/src/index.js"
+    "start": "node dist/src/server.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "cors": "^2.8.5",
+    "morgan": "^1.10.0"
   },
   "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/morgan": "^1.9.9",
     "@types/node": "^22.0.0",
     "tsx": "^4.19.0",
     "typescript": "^5.7.0"

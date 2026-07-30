@@ -1,7 +1,5 @@
 node_modules/
 dist/
-output/
 *.log
 .env
 .DS_Store
-package-lock.json
