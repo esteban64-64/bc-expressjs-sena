@@ -30,16 +30,15 @@ app.get("/health", (_req: Request, res: Response) => {
 
 // Handler 404
 app.use((_req: Request, res: Response) => {
-  res.status(404).json({ exito: false, mensaje: "Ruta no encontrada" });
+  res.status(404).json({ error: "Not Found", message: "Ruta no encontrada" });
 });
 
 // Error handler global (4 parámetros, SIEMPRE último)
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
   console.error("[Error Handler]", err.stack);
   res.status(500).json({
-    exito: false,
-    mensaje: "Error interno del servidor",
-    error: process.env.NODE_ENV === "development" ? err.message : undefined,
+    error: "Internal Server Error",
+    message: process.env.NODE_ENV === "development" ? err.message : "Error interno del servidor",
   });
 });
 

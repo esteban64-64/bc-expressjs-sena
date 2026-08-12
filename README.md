@@ -1,7 +1,7 @@
-# Semana 2 — API REST con Express (SENA Centro de Formación)
+# Semana 3 — API REST con Arquitectura en Capas (SENA Centro de Formación)
 
-API CRUD en **Express 5 + TypeScript** para gestionar aprendices de un
-Centro de Formación SENA. Datos en memoria (sin base de datos).
+API REST en **Express 5 + TypeScript** con arquitectura en **4 capas**:
+`routes → controllers → services → repositories`.
 
 **Dominio**: SENA Centro de Formación
 **Recurso implementado**: Apprentice (`nombre_completo`, `documento`, `ficha`, `estado`, `promedio_acumulado`, `costo_matricula`)
@@ -10,12 +10,17 @@ Centro de Formación SENA. Datos en memoria (sin base de datos).
 
 ```
 src/
-├── tipos.ts                    # Interfaces del dominio
-├── almacen.ts                  # Store en memoria (CRUD)
+├── tipos.ts                          # Interfaces, DTOs, contratos de respuesta
+├── repositorios/
+│   └── aprendices.repositorio.ts     # Store en memoria, async, copias defensivas
+├── servicios/
+│   └── aprendices.servicio.ts        # Lógica de negocio, paginación, validaciones
+├── controladores/
+│   └── aprendices.controlador.ts     # 3 pasos: extraer → service → responder
 ├── rutas/
-│   └── aprendices.rutas.ts     # 5 endpoints REST
-├── aplicacion.ts               # Configuración Express + middlewares
-└── servidor.ts                 # Entry point + graceful shutdown
+│   └── aprendices.rutas.ts           # Solo mapeo URL → controller
+├── aplicacion.ts                     # Configuración Express + middlewares
+└── servidor.ts                       # Entry point + graceful shutdown
 ```
 
 ## Instalación y ejecución
@@ -32,27 +37,54 @@ pnpm build        # verifica TypeScript estricto
 
 | Método | Ruta | Descripción | Status |
 |--------|------|-------------|--------|
-| GET | `/api/v1/apprentices` | Listar todos | 200 |
+| GET | `/api/v1/apprentices?page=1&limit=5` | Listar paginado | 200 |
 | GET | `/api/v1/apprentices/:id` | Obtener por ID | 200 / 404 |
 | POST | `/api/v1/apprentices` | Crear nuevo | 201 / 400 |
-| PUT | `/api/v1/apprentices/:id` | Actualizar | 200 / 404 |
+| PUT | `/api/v1/apprentices/:id` | Actualizar | 200 / 400 / 404 |
 | DELETE | `/api/v1/apprentices/:id` | Eliminar | 204 / 404 |
 | GET | `/health` | Health check | 200 |
 
-## Middlewares implementados
+## Contratos de respuesta
 
-1. `cors()` — habilitar CORS
-2. `express.json()` — parseo de body JSON
-3. `morgan("dev")` — logging de requests HTTP
-4. **Logger personalizado** — método, URL, status, tiempo (ms)
-5. **Handler 404** — rutas no encontradas
-6. **Error handler global** — 4 parámetros, siempre último
+### Listado paginado (GET /api/v1/apprentices)
+```json
+{
+  "data": [...],
+  "total": 12,
+  "page": 1,
+  "limit": 5
+}
+```
+
+### Individual (GET /api/v1/apprentices/:id, POST, PUT)
+```json
+{
+  "data": { ... }
+}
+```
+
+### Error
+```json
+{
+  "error": "Not Found",
+  "message": "Aprendiz con id 999 no encontrado"
+}
+```
+
+## Reglas de la arquitectura
+
+| Capa | Responsabilidad | Reglas |
+|------|-----------------|--------|
+| **Repository** | Acceso a datos | Única capa que toca el store. Todos los métodos son `async`. Devuelve copias defensivas. |
+| **Service** | Lógica de negocio | Sin imports de Express. Paginación y validaciones de dominio. |
+| **Controller** | HTTP | Exactamente 3 pasos: extraer datos del request → llamar service → responder con contrato. |
+| **Routes** | Mapeo | Solo mapea URL → controller function. Sin lógica. |
 
 ## Pruebas con curl
 
 ```bash
-# Listar todos
-curl http://localhost:3000/api/v1/apprentices
+# Listar paginado
+curl "http://localhost:3000/api/v1/apprentices?page=1&limit=5"
 
 # Obtener por ID
 curl http://localhost:3000/api/v1/apprentices/1
@@ -73,7 +105,8 @@ curl -X DELETE http://localhost:3000/api/v1/apprentices/13
 
 ## Decisiones de diseño
 
-- **Almacén en memoria**: Array con 12 aprendices iniciales, sin base de datos.
-- **Validación básica**: Campos obligatorios en POST (`nombre_completo`, `documento`, `ficha`).
-- **Status codes correctos**: 200, 201, 204, 400, 404, 500 según corresponda.
-- **Graceful shutdown**: Manejo de `SIGTERM` y `SIGINT` para cerrar el servidor limpiamente.
+- **Arquitectura en capas**: Separación clara de responsabilidades entre routes, controllers, services y repositories.
+- **Async/await en repository**: Prepara la arquitectura para cuando se reemplace el store por una base de datos real.
+- **Copias defensivas**: El repository devuelve copias para evitar que el service o controller muten el store directamente.
+- **Paginación en service**: La lógica de paginación vive en el service, no en el controller ni en el repository.
+- **Contratos consistentes**: Todos los endpoints responden con el mismo formato de respuesta (data, error, paginación).

@@ -5,7 +5,7 @@ const PUERTO = process.env.PORT || 3000;
 const servidor = app.listen(PUERTO, () => {
   console.log(`\n🚀 Servidor SENA Centro de Formación corriendo en http://localhost:${PUERTO}`);
   console.log(`📚 Rutas disponibles:`);
-  console.log(`   GET    http://localhost:${PUERTO}/api/v1/apprentices`);
+  console.log(`   GET    http://localhost:${PUERTO}/api/v1/apprentices?page=1&limit=5`);
   console.log(`   GET    http://localhost:${PUERTO}/api/v1/apprentices/:id`);
   console.log(`   POST   http://localhost:${PUERTO}/api/v1/apprentices`);
   console.log(`   PUT    http://localhost:${PUERTO}/api/v1/apprentices/:id`);

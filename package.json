@@ -1,7 +1,7 @@
 {
-  "name": "semana02-sena-express-intro",
+  "name": "semana03-sena-rest-api-capas",
   "version": "1.0.0",
-  "description": "Semana 02 - API REST con Express (SENA Centro de Formaci\u00f3n)",
+  "description": "Semana 03 - API REST con arquitectura en capas (SENA Centro de Formaci\u00f3n)",
   "engines": {
     "node": ">=22.0.0"
   },
