@@ -1,15 +1,15 @@
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import type { CentroFormacionDataset } from "./types.js";
+import type { CentroFormacionDataset } from "./tipos.js";
 
-export async function readDataset(filePath: string): Promise<CentroFormacionDataset> {
-  const fullPath = resolve(import.meta.dirname, "..", filePath);
+export async function leerDataset(ruta: string): Promise<CentroFormacionDataset> {
+  const rutaCompleta = resolve(import.meta.dirname, "..", ruta);
   try {
-    const raw = await readFile(fullPath, "utf-8");
+    const raw = await readFile(rutaCompleta, "utf-8");
     return JSON.parse(raw) as CentroFormacionDataset;
   } catch (err) {
     if ((err as NodeJS.ErrnoException).code === "ENOENT") {
-      console.error(`Error: No se encontró el archivo de datos en: ${fullPath}`);
+      console.error(`Error: No se encontró el archivo de datos en: ${rutaCompleta}`);
     } else {
       console.error("Error al leer el archivo:", err instanceof Error ? err.message : err);
     }

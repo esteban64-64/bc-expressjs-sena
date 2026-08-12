@@ -1,6 +1,7 @@
 /**
  * Tipos del dominio SENA — Centro de Formación
  * Entidades: Apprentices, Programs, Instructors, Competencies
+ * Recurso principal: Apprentice (Aprendiz)
  */
 
 export interface Apprentice {
@@ -52,7 +53,7 @@ export interface CentroFormacionDataset {
   apprentices: Apprentice[];
 }
 
-export interface Summary {
+export interface ResumenAprendices {
   total: number;
   activos: number;
   inactivos: number;
@@ -64,8 +65,8 @@ export interface Summary {
   aprendizMasBarato: Apprentice;
 }
 
-export interface Report {
-  summary: Summary;
+export interface Reporte {
+  resumen: ResumenAprendices;
   filtrados?: Apprentice[];
   filtroAplicado?: string;
   generadoEn: string;

@@ -1,15 +1,15 @@
 {
   "name": "semana01-sena-centro-formacion",
   "version": "1.0.0",
-  "description": "Proyecto semanal \u2014 Procesador de datos SENA Centro de Formaci\u00f3n (dominio: SENA)",
+  "description": "Semana 01 - Procesador de datos SENA Centro de Formaci\u00f3n (dominio: SENA)",
   "engines": {
     "node": ">=22.0.0"
   },
   "packageManager": "pnpm@10.34.5",
   "scripts": {
-    "dev": "tsx src/index.ts",
+    "dev": "tsx src/principal.ts",
     "build": "tsc --noEmit",
-    "start": "node dist/src/index.js"
+    "start": "node dist/src/principal.js"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
