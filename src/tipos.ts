@@ -15,5 +15,5 @@ export interface Apprentice {
   costo_matricula: number;
 }
 
-export type CreateApprenticeDto = Omit<Apprentice, "id">;
-export type UpdateApprenticeDto = Partial<CreateApprenticeDto>;
+export type CrearAprendizDto = Omit<Apprentice, "id">;
+export type ActualizarAprendizDto = Partial<CrearAprendizDto>;

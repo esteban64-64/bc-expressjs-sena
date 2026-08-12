@@ -1,24 +1,26 @@
-# Proyecto Semana 02 — API CRUD Express (SENA Centro de Formación)
+# Semana 2 — API REST con Express (SENA Centro de Formación)
 
-Entrega de semana 02 para `bc-expressjs`.
+API CRUD en **Express 5 + TypeScript** para gestionar aprendices de un
+Centro de Formación SENA. Datos en memoria (sin base de datos).
 
-## Dominio asignado
-
-**SENA — Centro de Formación** — recurso `Apprentice` (`nombre_completo`, `documento`, `ficha`, `estado`, `promedio_acumulado`, `costo_matricula`).
+**Dominio**: SENA Centro de Formación
+**Recurso implementado**: Apprentice (`nombre_completo`, `documento`, `ficha`, `estado`, `promedio_acumulado`, `costo_matricula`)
 
 ## Estructura
 
 ```
 src/
-├── app.ts                      # Configuración Express + middlewares
-├── server.ts                   # Entry point + graceful shutdown
-├── types.ts                    # Interfaces del dominio
-├── store.ts                    # Store en memoria (CRUD)
-└── routes/
-    └── apprentices.routes.ts   # 5 endpoints CRUD
+├── tipos.ts                    # Interfaces del dominio
+├── almacen.ts                  # Store en memoria (CRUD)
+├── rutas/
+│   └── aprendices.rutas.ts     # 5 endpoints REST
+├── aplicacion.ts               # Configuración Express + middlewares
+└── servidor.ts                 # Entry point + graceful shutdown
 ```
 
-## Cómo correr
+## Instalación y ejecución
+
+Requiere Node.js 22+ y pnpm.
 
 ```bash
 pnpm install
@@ -32,7 +34,7 @@ pnpm build        # verifica TypeScript estricto
 |--------|------|-------------|--------|
 | GET | `/api/v1/apprentices` | Listar todos | 200 |
 | GET | `/api/v1/apprentices/:id` | Obtener por ID | 200 / 404 |
-| POST | `/api/v1/apprentices` | Crear nuevo | 201 |
+| POST | `/api/v1/apprentices` | Crear nuevo | 201 / 400 |
 | PUT | `/api/v1/apprentices/:id` | Actualizar | 200 / 404 |
 | DELETE | `/api/v1/apprentices/:id` | Eliminar | 204 / 404 |
 | GET | `/health` | Health check | 200 |
@@ -71,7 +73,7 @@ curl -X DELETE http://localhost:3000/api/v1/apprentices/13
 
 ## Decisiones de diseño
 
-- **Store en memoria**: Array con datos iniciales (12 aprendices), sin base de datos.
+- **Almacén en memoria**: Array con 12 aprendices iniciales, sin base de datos.
 - **Validación básica**: Campos obligatorios en POST (`nombre_completo`, `documento`, `ficha`).
 - **Status codes correctos**: 200, 201, 204, 400, 404, 500 según corresponda.
 - **Graceful shutdown**: Manejo de `SIGTERM` y `SIGINT` para cerrar el servidor limpiamente.

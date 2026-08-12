@@ -1,12 +1,12 @@
-import type { Apprentice, CreateApprenticeDto } from "./types.js";
+import type { Apprentice, CrearAprendizDto } from "./tipos.js";
 
 /**
- * Store en memoria — Base de datos temporal para aprendices SENA
+ * Almacén en memoria — Base de datos temporal para aprendices SENA
  */
 
-let nextId = 13;
+let siguienteId = 13;
 
-const apprentices: Apprentice[] = [
+const aprendices: Apprentice[] = [
   { id: 1, nombre_completo: "Valentina Ruiz", documento: "1010234567", programa_id: 1, ficha: "2765412", estado: "activo", fecha_ingreso: "2025-01-15", promedio_acumulado: 4.5, costo_matricula: 1200000 },
   { id: 2, nombre_completo: "Esteban Quintero", documento: "1020345678", programa_id: 1, ficha: "2765412", estado: "activo", fecha_ingreso: "2025-01-15", promedio_acumulado: 4.2, costo_matricula: 1200000 },
   { id: 3, nombre_completo: "Dayan Cárdenas", documento: "1030456789", programa_id: 1, ficha: "2765412", estado: "activo", fecha_ingreso: "2025-01-15", promedio_acumulado: 4.8, costo_matricula: 1200000 },
@@ -21,30 +21,30 @@ const apprentices: Apprentice[] = [
   { id: 12, nombre_completo: "Miguel Ángel Suárez", documento: "1121345678", programa_id: 4, ficha: "2765415", estado: "retirado", fecha_ingreso: "2025-03-10", promedio_acumulado: 2.8, costo_matricula: 800000 }
 ];
 
-export function getAll(): Apprentice[] {
-  return apprentices;
+export function obtenerTodos(): Apprentice[] {
+  return aprendices;
 }
 
-export function getById(id: number): Apprentice | undefined {
-  return apprentices.find((a) => a.id === id);
+export function obtenerPorId(id: number): Apprentice | undefined {
+  return aprendices.find((a) => a.id === id);
 }
 
-export function create(data: CreateApprenticeDto): Apprentice {
-  const apprentice: Apprentice = { id: nextId++, ...data };
-  apprentices.push(apprentice);
-  return apprentice;
+export function crear(datos: CrearAprendizDto): Apprentice {
+  const aprendiz: Apprentice = { id: siguienteId++, ...datos };
+  aprendices.push(aprendiz);
+  return aprendiz;
 }
 
-export function update(id: number, data: Partial<CreateApprenticeDto>): Apprentice | undefined {
-  const idx = apprentices.findIndex((a) => a.id === id);
+export function actualizar(id: number, datos: Partial<CrearAprendizDto>): Apprentice | undefined {
+  const idx = aprendices.findIndex((a) => a.id === id);
   if (idx === -1) return undefined;
-  apprentices[idx] = { ...apprentices[idx], ...data };
-  return apprentices[idx];
+  aprendices[idx] = { ...aprendices[idx], ...datos };
+  return aprendices[idx];
 }
 
-export function remove(id: number): boolean {
-  const idx = apprentices.findIndex((a) => a.id === id);
+export function eliminar(id: number): boolean {
+  const idx = aprendices.findIndex((a) => a.id === id);
   if (idx === -1) return false;
-  apprentices.splice(idx, 1);
+  aprendices.splice(idx, 1);
   return true;
 }

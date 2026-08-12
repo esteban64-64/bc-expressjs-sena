@@ -1,15 +1,15 @@
 {
   "name": "semana02-sena-express-intro",
   "version": "1.0.0",
-  "description": "Semana 02 - Express Intro | API CRUD SENA Centro de Formaci\u00f3n",
+  "description": "Semana 02 - API REST con Express (SENA Centro de Formaci\u00f3n)",
   "engines": {
     "node": ">=22.0.0"
   },
   "packageManager": "pnpm@10.34.5",
   "scripts": {
-    "dev": "tsx src/server.ts",
+    "dev": "tsx src/servidor.ts",
     "build": "tsc --noEmit",
-    "start": "node dist/src/server.js"
+    "start": "node dist/src/servidor.js"
   },
   "dependencies": {
     "express": "^5.1.0",
