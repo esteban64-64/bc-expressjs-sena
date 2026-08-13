@@ -1,10 +1,5 @@
-import type { Apprentice, CrearAprendizDto, ActualizarAprendizDto } from "../tipos.js";
-
-/**
- * Repository — Única capa que toca el store.
- * Todos los métodos son async Promise<T>.
- * Devuelve copias defensivas para evitar mutaciones externas.
- */
+import type { Apprentice } from "../tipos.js";
+import type { CrearAprendizInput, ActualizarAprendizInput } from "../schemas/aprendiz.schema.js";
 
 let siguienteId = 13;
 
@@ -23,38 +18,34 @@ const aprendices: Apprentice[] = [
   { id: 12, nombre_completo: "Miguel Ángel Suárez", documento: "1121345678", programa_id: 4, ficha: "2765415", estado: "retirado", fecha_ingreso: "2025-03-10", promedio_acumulado: 2.8, costo_matricula: 800000, createdAt: "2025-03-10T00:00:00.000Z" }
 ];
 
-function copiaDefensiva<T>(obj: T): T {
+function copia<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj));
 }
 
 export async function obtenerTodos(): Promise<Apprentice[]> {
-  return copiaDefensiva(aprendices);
+  return copia(aprendices);
 }
 
 export async function obtenerPorId(id: number): Promise<Apprentice | undefined> {
-  const encontrado = aprendices.find((a) => a.id === id);
-  return encontrado ? copiaDefensiva(encontrado) : undefined;
+  const a = aprendices.find((x) => x.id === id);
+  return a ? copia(a) : undefined;
 }
 
-export async function crear(datos: CrearAprendizDto): Promise<Apprentice> {
-  const aprendiz: Apprentice = {
-    id: siguienteId++,
-    ...datos,
-    createdAt: new Date().toISOString(),
-  };
+export async function crear(datos: CrearAprendizInput): Promise<Apprentice> {
+  const aprendiz: Apprentice = { id: siguienteId++, ...datos, createdAt: new Date().toISOString() };
   aprendices.push(aprendiz);
-  return copiaDefensiva(aprendiz);
+  return copia(aprendiz);
 }
 
-export async function actualizar(id: number, datos: ActualizarAprendizDto): Promise<Apprentice | undefined> {
-  const idx = aprendices.findIndex((a) => a.id === id);
+export async function actualizar(id: number, datos: ActualizarAprendizInput): Promise<Apprentice | undefined> {
+  const idx = aprendices.findIndex((x) => x.id === id);
   if (idx === -1) return undefined;
   aprendices[idx] = { ...aprendices[idx], ...datos };
-  return copiaDefensiva(aprendices[idx]);
+  return copia(aprendices[idx]);
 }
 
 export async function eliminar(id: number): Promise<boolean> {
-  const idx = aprendices.findIndex((a) => a.id === id);
+  const idx = aprendices.findIndex((x) => x.id === id);
   if (idx === -1) return false;
   aprendices.splice(idx, 1);
   return true;

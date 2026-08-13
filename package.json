@@ -1,7 +1,7 @@
 {
-  "name": "semana03-sena-rest-api-capas",
+  "name": "semana04-sena-validacion-errores",
   "version": "1.0.0",
-  "description": "Semana 03 - API REST con arquitectura en capas (SENA Centro de Formaci\u00f3n)",
+  "description": "Semana 04 - Validaci\u00f3n Zod, AppError, Winston logging (SENA Centro de Formaci\u00f3n)",
   "engines": {
     "node": ">=22.0.0"
   },
@@ -14,7 +14,9 @@
   "dependencies": {
     "express": "^5.1.0",
     "cors": "^2.8.5",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "winston": "^3.17.0",
+    "zod": "^3.25.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

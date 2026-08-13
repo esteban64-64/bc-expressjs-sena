@@ -1,9 +1,10 @@
 import app from "./aplicacion.js";
+import { logger } from "./config/logger.js";
 
 const PUERTO = process.env.PORT || 3000;
 
 const servidor = app.listen(PUERTO, () => {
-  console.log(`\n🚀 Servidor SENA Centro de Formación corriendo en http://localhost:${PUERTO}`);
+  logger.info(`🚀 Servidor SENA Centro de Formación corriendo en http://localhost:${PUERTO}`);
   console.log(`📚 Rutas disponibles:`);
   console.log(`   GET    http://localhost:${PUERTO}/api/v1/apprentices?page=1&limit=5`);
   console.log(`   GET    http://localhost:${PUERTO}/api/v1/apprentices/:id`);
@@ -13,19 +14,18 @@ const servidor = app.listen(PUERTO, () => {
   console.log(`   GET    http://localhost:${PUERTO}/health\n`);
 });
 
-// Graceful shutdown
 process.on("SIGTERM", () => {
-  console.log("\n⚠️ SIGTERM recibido. Cerrando servidor...");
+  logger.info("⚠️ SIGTERM recibido. Cerrando servidor...");
   servidor.close(() => {
-    console.log("✅ Servidor cerrado");
+    logger.info("✅ Servidor cerrado");
     process.exit(0);
   });
 });
 
 process.on("SIGINT", () => {
-  console.log("\n⚠️ SIGINT recibido. Cerrando servidor...");
+  logger.info("⚠️ SIGINT recibido. Cerrando servidor...");
   servidor.close(() => {
-    console.log("✅ Servidor cerrado");
+    logger.info("✅ Servidor cerrado");
     process.exit(0);
   });
 });
