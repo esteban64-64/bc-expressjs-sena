@@ -20,7 +20,7 @@ async function main(): Promise<void> {
     aprendices = filtrados;
   }
 
-  const resumen = calcularResumen(aprendices);
+  const resumen = calcularResumen(aprendices, data.programs);
 
   const reporte: Reporte = {
     resumen,
@@ -49,6 +49,10 @@ async function main(): Promise<void> {
   console.log(`📈 Matrícula más alta   : $${resumen.costoMaximo.toLocaleString("es-CO")} (${resumen.aprendizMasCaro.nombre_completo})`);
   console.log(`📉 Matrícula más baja   : $${resumen.costoMinimo.toLocaleString("es-CO")} (${resumen.aprendizMasBarato.nombre_completo})`);
   console.log("=".repeat(50));
+  console.log("\n📚 Resumen por programa:");
+  for (const p of resumen.porPrograma) {
+    console.log(`  - ${p.programa} (${p.nivel}): ${p.totalAprendices} aprendices, promedio acumulado ${p.promedioAcumulado}`);
+  }
   console.log("\n✅ Reporte guardado en: salida/reporte.json");
 }
 

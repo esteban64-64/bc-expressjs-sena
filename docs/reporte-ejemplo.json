@@ -1,0 +1,162 @@
+{
+  "resumen": {
+    "total": 9,
+    "activos": 9,
+    "inactivos": 0,
+    "graduados": 0,
+    "promedioCosto": 1077777.78,
+    "costoMaximo": 1200000,
+    "costoMinimo": 800000,
+    "aprendizMasCaro": {
+      "id": 1,
+      "nombre_completo": "Valentina Ruiz",
+      "documento": "1010234567",
+      "programa_id": 1,
+      "ficha": "2765412",
+      "estado": "activo",
+      "fecha_ingreso": "2025-01-15",
+      "promedio_acumulado": 4.5,
+      "costo_matricula": 1200000
+    },
+    "aprendizMasBarato": {
+      "id": 8,
+      "nombre_completo": "Daniel Castro",
+      "documento": "1080901234",
+      "programa_id": 4,
+      "ficha": "2765415",
+      "estado": "activo",
+      "fecha_ingreso": "2025-03-10",
+      "promedio_acumulado": 4.3,
+      "costo_matricula": 800000
+    },
+    "porPrograma": [
+      {
+        "programa": "Análisis y Desarrollo de Software",
+        "nivel": "Tecnólogo",
+        "totalAprendices": 4,
+        "promedioAcumulado": 4.55
+      },
+      {
+        "programa": "Gestión Empresarial",
+        "nivel": "Tecnólogo",
+        "totalAprendices": 2,
+        "promedioAcumulado": 4.35
+      },
+      {
+        "programa": "Mecatrónica Industrial",
+        "nivel": "Tecnólogo",
+        "totalAprendices": 2,
+        "promedioAcumulado": 3.95
+      },
+      {
+        "programa": "Enfermería",
+        "nivel": "Técnico",
+        "totalAprendices": 1,
+        "promedioAcumulado": 4.3
+      }
+    ]
+  },
+  "generadoEn": "2026-09-06T23:58:28.777Z",
+  "filtroAplicado": "activo",
+  "filtrados": [
+    {
+      "id": 1,
+      "nombre_completo": "Valentina Ruiz",
+      "documento": "1010234567",
+      "programa_id": 1,
+      "ficha": "2765412",
+      "estado": "activo",
+      "fecha_ingreso": "2025-01-15",
+      "promedio_acumulado": 4.5,
+      "costo_matricula": 1200000
+    },
+    {
+      "id": 2,
+      "nombre_completo": "Esteban Quintero",
+      "documento": "1020345678",
+      "programa_id": 1,
+      "ficha": "2765412",
+      "estado": "activo",
+      "fecha_ingreso": "2025-01-15",
+      "promedio_acumulado": 4.2,
+      "costo_matricula": 1200000
+    },
+    {
+      "id": 3,
+      "nombre_completo": "Dayan Cárdenas",
+      "documento": "1030456789",
+      "programa_id": 1,
+      "ficha": "2765412",
+      "estado": "activo",
+      "fecha_ingreso": "2025-01-15",
+      "promedio_acumulado": 4.8,
+      "costo_matricula": 1200000
+    },
+    {
+      "id": 5,
+      "nombre_completo": "Luz Marina Torres",
+      "documento": "1050678901",
+      "programa_id": 2,
+      "ficha": "2765413",
+      "estado": "activo",
+      "fecha_ingreso": "2025-02-01",
+      "promedio_acumulado": 4.6,
+      "costo_matricula": 950000
+    },
+    {
+      "id": 7,
+      "nombre_completo": "Sofía Herrera",
+      "documento": "1070890123",
+      "programa_id": 3,
+      "ficha": "2765414",
+      "estado": "activo",
+      "fecha_ingreso": "2025-03-10",
+      "promedio_acumulado": 3.9,
+      "costo_matricula": 1100000
+    },
+    {
+      "id": 8,
+      "nombre_completo": "Daniel Castro",
+      "documento": "1080901234",
+      "programa_id": 4,
+      "ficha": "2765415",
+      "estado": "activo",
+      "fecha_ingreso": "2025-03-10",
+      "promedio_acumulado": 4.3,
+      "costo_matricula": 800000
+    },
+    {
+      "id": 9,
+      "nombre_completo": "Camila Mendoza",
+      "documento": "1091012345",
+      "programa_id": 2,
+      "ficha": "2765413",
+      "estado": "activo",
+      "fecha_ingreso": "2025-02-01",
+      "promedio_acumulado": 4.1,
+      "costo_matricula": 950000
+    },
+    {
+      "id": 10,
+      "nombre_completo": "Juan Pablo Vargas",
+      "documento": "1101123456",
+      "programa_id": 3,
+      "ficha": "2765414",
+      "estado": "activo",
+      "fecha_ingreso": "2025-03-10",
+      "promedio_acumulado": 4,
+      "costo_matricula": 1100000
+    },
+    {
+      "id": 11,
+      "nombre_completo": "Laura Gutiérrez",
+      "documento": "1111234567",
+      "programa_id": 1,
+      "ficha": "2765412",
+      "estado": "activo",
+      "fecha_ingreso": "2025-01-15",
+      "promedio_acumulado": 4.7,
+      "costo_matricula": 1200000
+    }
+  ]
+}

@@ -1,6 +1,25 @@
-import type { Apprentice, ResumenAprendices } from "./tipos.js";
+import type { Apprentice, Program, ResumenAprendices, ResumenPorPrograma } from "./tipos.js";
 
-export function calcularResumen(aprendices: Apprentice[]): ResumenAprendices {
+function calcularResumenPorPrograma(aprendices: Apprentice[], programas: Program[]): ResumenPorPrograma[] {
+  return programas
+    .map((programa) => {
+      const propios = aprendices.filter((a) => a.programa_id === programa.id);
+      const promedioAcumulado =
+        propios.length === 0
+          ? 0
+          : Math.round((propios.reduce((s, a) => s + a.promedio_acumulado, 0) / propios.length) * 100) / 100;
+
+      return {
+        programa: programa.nombre,
+        nivel: programa.nivel,
+        totalAprendices: propios.length,
+        promedioAcumulado,
+      };
+    })
+    .filter((resumen) => resumen.totalAprendices > 0);
+}
+
+export function calcularResumen(aprendices: Apprentice[], programas: Program[]): ResumenAprendices {
   const total = aprendices.length;
   const activos = aprendices.filter((a) => a.estado === "activo").length;
   const inactivos = aprendices.filter((a) => a.estado === "retirado").length;
@@ -26,6 +45,7 @@ export function calcularResumen(aprendices: Apprentice[]): ResumenAprendices {
     costoMinimo,
     aprendizMasCaro,
     aprendizMasBarato,
+    porPrograma: calcularResumenPorPrograma(aprendices, programas),
   };
 }
 

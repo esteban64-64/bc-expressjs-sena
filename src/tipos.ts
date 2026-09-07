@@ -53,6 +53,13 @@ export interface CentroFormacionDataset {
   apprentices: Apprentice[];
 }
 
+export interface ResumenPorPrograma {
+  programa: string;
+  nivel: Program["nivel"];
+  totalAprendices: number;
+  promedioAcumulado: number;
+}
+
 export interface ResumenAprendices {
   total: number;
   activos: number;
@@ -63,6 +70,7 @@ export interface ResumenAprendices {
   costoMinimo: number;
   aprendizMasCaro: Apprentice;
   aprendizMasBarato: Apprentice;
+  porPrograma: ResumenPorPrograma[];
 }
 
 export interface Reporte {
