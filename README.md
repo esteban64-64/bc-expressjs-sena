@@ -122,7 +122,7 @@ curl http://localhost:3000/api/v1/noexiste
 
 ## Decisiones de diseño
 
-- **Zod safeParse**: No se usa directamente en controllers; se usa `.parse()` que lanza ZodError, capturado por el errorHandler.
+- **Zod safeParse**: los controladores usan `.safeParse()`; si falla, el `ZodError` se pasa a `next()` y el `errorHandler` global responde 400 con `issues[]`.
 - **AppError.isOperational**: Distingue errores esperados (404, 400) de errores críticos (500).
 - **Morgan + Winston**: Morgan usa el stream de Winston para unificar logs.
 - **notFound antes de errorHandler**: Garantiza que rutas no encontradas pasen por el errorHandler.
