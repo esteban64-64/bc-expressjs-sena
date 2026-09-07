@@ -1,5 +1,6 @@
 import app from "./aplicacion.js";
 import { logger } from "./config/logger.js";
+import { prisma } from "./lib/prisma.js";
 
 const PUERTO = process.env.PORT || 3000;
 
@@ -14,18 +15,14 @@ const servidor = app.listen(PUERTO, () => {
   logger.info(`   GET    http://localhost:${PUERTO}/health`);
 });
 
-process.on("SIGTERM", () => {
-  logger.info("⚠️ SIGTERM recibido. Cerrando servidor...");
-  servidor.close(() => {
+function cerrar(señal: string): void {
+  logger.info(`⚠️ ${señal} recibido. Cerrando servidor...`);
+  servidor.close(async () => {
+    await prisma.$disconnect();
     logger.info("✅ Servidor cerrado");
     process.exit(0);
   });
-});
+}
 
-process.on("SIGINT", () => {
-  logger.info("⚠️ SIGINT recibido. Cerrando servidor...");
-  servidor.close(() => {
-    logger.info("✅ Servidor cerrado");
-    process.exit(0);
-  });
-});
+process.on("SIGTERM", () => cerrar("SIGTERM"));
+process.on("SIGINT", () => cerrar("SIGINT"));

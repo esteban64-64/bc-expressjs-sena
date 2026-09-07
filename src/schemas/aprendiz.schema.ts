@@ -6,22 +6,22 @@ import { z } from "zod";
  */
 
 export const crearAprendizSchema = z.object({
-  nombre_completo: z.string().min(1, "El nombre completo es obligatorio").trim(),
+  nombreCompleto: z.string().min(1, "El nombre completo es obligatorio").trim(),
   documento: z.string().min(5, "El documento debe tener al menos 5 caracteres").trim(),
-  programa_id: z.number().int().positive("El programa_id debe ser un número positivo"),
+  programId: z.string().uuid("programId debe ser un UUID válido"),
   ficha: z.string().min(1, "La ficha es obligatoria").trim(),
   estado: z.enum(["activo", "retirado", "graduado"], {
     errorMap: () => ({ message: "Estado inválido. Debe ser: activo, retirado, graduado" }),
   }),
-  fecha_ingreso: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "La fecha debe tener formato YYYY-MM-DD"),
-  promedio_acumulado: z.number().min(0, "El promedio mínimo es 0").max(5, "El promedio máximo es 5"),
-  costo_matricula: z.number().int().positive("El costo de matrícula debe ser mayor a 0"),
+  fechaIngreso: z.coerce.date({ errorMap: () => ({ message: "fechaIngreso debe ser una fecha válida (YYYY-MM-DD)" }) }),
+  promedioAcumulado: z.number().min(0, "El promedio mínimo es 0").max(5, "El promedio máximo es 5"),
+  costoMatricula: z.number().positive("El costo de matrícula debe ser mayor a 0"),
 });
 
 export const actualizarAprendizSchema = crearAprendizSchema.partial();
 
 export const idParamSchema = z.object({
-  id: z.coerce.number().int().positive("El ID debe ser un número entero positivo"),
+  id: z.string().uuid("El ID debe ser un UUID válido"),
 });
 
 export const paginacionQuerySchema = z.object({

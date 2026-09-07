@@ -1,7 +1,7 @@
 {
-  "name": "semana04-sena-validacion-errores",
+  "name": "semana05-sena-postgresql-prisma",
   "version": "1.0.0",
-  "description": "Semana 04 - Validaci\u00f3n Zod, AppError, Winston logging (SENA Centro de Formaci\u00f3n)",
+  "description": "Semana 05 - API con PostgreSQL y Prisma ORM (SENA Centro de Formación)",
   "engines": {
     "node": ">=22.0.0"
   },
@@ -9,9 +9,14 @@
   "scripts": {
     "dev": "tsx src/servidor.ts",
     "build": "tsc --noEmit",
-    "start": "node dist/src/servidor.js"
+    "start": "node dist/src/servidor.js",
+    "postinstall": "prisma generate"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
+    "@prisma/client": "6.8.2",
     "express": "5.2.1",
     "cors": "2.8.6",
     "morgan": "1.11.0",
@@ -23,6 +28,7 @@
     "@types/express": "5.0.6",
     "@types/morgan": "1.9.10",
     "@types/node": "22.20.1",
+    "prisma": "6.8.2",
     "tsx": "4.23.12",
     "typescript": "5.9.3"
   },

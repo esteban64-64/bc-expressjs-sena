@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: sena-centro-formacion-db
+    environment:
+      POSTGRES_USER: sena
+      POSTGRES_PASSWORD: sena123
+      POSTGRES_DB: sena_centro_formacion
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
