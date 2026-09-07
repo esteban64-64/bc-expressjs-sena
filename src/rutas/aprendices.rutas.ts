@@ -1,8 +1,29 @@
 import express, { Router, type Request, type Response } from "express";
 import * as almacen from "../almacen.js";
-import type { CrearAprendizDto } from "../tipos.js";
+import type { ActualizarAprendizDto, Apprentice, CrearAprendizDto } from "../tipos.js";
 
 const router: express.Router = Router();
+
+const ESTADOS_VALIDOS: Apprentice["estado"][] = ["activo", "retirado", "graduado"];
+
+function validarActualizacion(body: ActualizarAprendizDto): string | undefined {
+  if (Object.keys(body).length === 0) {
+    return "El cuerpo de la petición no puede estar vacío";
+  }
+  if ("nombre_completo" in body && typeof body.nombre_completo !== "string") {
+    return "nombre_completo debe ser texto";
+  }
+  if ("documento" in body && typeof body.documento !== "string") {
+    return "documento debe ser texto";
+  }
+  if ("ficha" in body && typeof body.ficha !== "string") {
+    return "ficha debe ser texto";
+  }
+  if ("estado" in body && !ESTADOS_VALIDOS.includes(body.estado as Apprentice["estado"])) {
+    return `estado debe ser uno de: ${ESTADOS_VALIDOS.join(", ")}`;
+  }
+  return undefined;
+}
 
 // GET /api/v1/apprentices — Listar todos
 router.get("/", (_req: Request, res: Response) => {
@@ -52,7 +73,13 @@ router.put("/:id", (req: Request, res: Response) => {
     return;
   }
 
-  const body = req.body as Partial<CrearAprendizDto>;
+  const body = req.body as ActualizarAprendizDto;
+  const error = validarActualizacion(body);
+  if (error) {
+    res.status(400).json({ exito: false, mensaje: error });
+    return;
+  }
+
   const aprendiz = almacen.actualizar(id, body);
 
   if (!aprendiz) {
