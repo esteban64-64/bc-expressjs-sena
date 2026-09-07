@@ -1,6 +1,8 @@
 import express, { type Request, type Response } from "express";
 import cors from "cors";
 import morgan from "morgan";
+import cookieParser from "cookie-parser";
+import authRouter from "./rutas/auth.rutas.js";
 import aprendicesRouter from "./rutas/aprendices.rutas.js";
 import programasRouter from "./rutas/programas.rutas.js";
 import { notFound } from "./middlewares/notFound.js";
@@ -12,9 +14,11 @@ const app: express.Application = express();
 // Middlewares globales
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 app.use(morgan("dev", { stream: morganStream }));
 
 // Rutas
+app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/programs", programasRouter);
 app.use("/api/v1/apprentices", aprendicesRouter);
 

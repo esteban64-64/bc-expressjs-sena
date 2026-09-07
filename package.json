@@ -1,7 +1,7 @@
 {
-  "name": "semana06-sena-mongodb-mongoose",
+  "name": "semana07-sena-autenticacion-jwt",
   "version": "1.0.0",
-  "description": "Semana 06 - API REST con MongoDB y Mongoose (SENA Centro de Formación)",
+  "description": "Semana 07 - Autenticación JWT completa (SENA Centro de Formación)",
   "engines": {
     "node": ">=22.0.0"
   },
@@ -19,15 +19,24 @@
     "morgan": "1.11.0",
     "winston": "3.19.0",
     "zod": "3.25.76",
-    "dotenv": "16.4.7"
+    "dotenv": "16.4.7",
+    "bcrypt": "5.1.1",
+    "cookie-parser": "1.4.7",
+    "jsonwebtoken": "9.0.2"
   },
   "devDependencies": {
     "@types/cors": "2.8.19",
     "@types/express": "5.0.6",
     "@types/morgan": "1.9.10",
     "@types/node": "22.20.1",
+    "@types/bcrypt": "6.0.0",
+    "@types/cookie-parser": "1.4.9",
+    "@types/jsonwebtoken": "9.0.10",
     "tsx": "4.23.12",
     "typescript": "5.9.3"
   },
-  "type": "module"
+  "type": "module",
+  "pnpm": {
+    "onlyBuiltDependencies": ["bcrypt"]
+  }
 }
