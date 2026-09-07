@@ -5,13 +5,13 @@ const PUERTO = process.env.PORT || 3000;
 
 const servidor = app.listen(PUERTO, () => {
   logger.info(`🚀 Servidor SENA Centro de Formación corriendo en http://localhost:${PUERTO}`);
-  console.log(`📚 Rutas disponibles:`);
-  console.log(`   GET    http://localhost:${PUERTO}/api/v1/apprentices?page=1&limit=5`);
-  console.log(`   GET    http://localhost:${PUERTO}/api/v1/apprentices/:id`);
-  console.log(`   POST   http://localhost:${PUERTO}/api/v1/apprentices`);
-  console.log(`   PUT    http://localhost:${PUERTO}/api/v1/apprentices/:id`);
-  console.log(`   DELETE http://localhost:${PUERTO}/api/v1/apprentices/:id`);
-  console.log(`   GET    http://localhost:${PUERTO}/health\n`);
+  logger.info("📚 Rutas disponibles:");
+  logger.info(`   GET    http://localhost:${PUERTO}/api/v1/apprentices?page=1&limit=5`);
+  logger.info(`   GET    http://localhost:${PUERTO}/api/v1/apprentices/:id`);
+  logger.info(`   POST   http://localhost:${PUERTO}/api/v1/apprentices`);
+  logger.info(`   PUT    http://localhost:${PUERTO}/api/v1/apprentices/:id`);
+  logger.info(`   DELETE http://localhost:${PUERTO}/api/v1/apprentices/:id`);
+  logger.info(`   GET    http://localhost:${PUERTO}/health`);
 });
 
 process.on("SIGTERM", () => {
