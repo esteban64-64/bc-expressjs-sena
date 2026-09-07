@@ -5,7 +5,7 @@ import * as controlador from "../controladores/aprendices.controlador.js";
  * Routes — Solo mapeo URL → controller function.
  */
 
-const router = Router();
+const router: Router = Router();
 
 router.get("/", controlador.listar);
 router.get("/:id", controlador.obtenerPorId);
