@@ -49,6 +49,12 @@ const aprendizSchema = new Schema(
       ref: "Programa",
       required: [true, "El programa es requerido"],
     },
+    // ID del usuario que registró al aprendiz — permite que su propio
+    // registrador (rol "user") lo edite; solo "admin" puede eliminar.
+    createdBy: {
+      type: String,
+      required: true,
+    },
   },
   { timestamps: true, collection: "apprentices" }
 );

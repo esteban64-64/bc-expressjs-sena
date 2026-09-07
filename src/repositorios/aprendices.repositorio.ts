@@ -42,9 +42,9 @@ export async function obtenerPorId(id: string): Promise<unknown> {
   }
 }
 
-export async function crear(datos: CrearAprendizInput): Promise<unknown> {
+export async function crear(datos: CrearAprendizInput, createdBy: string): Promise<unknown> {
   try {
-    const aprendiz = await Aprendiz.create(datos);
+    const aprendiz = await Aprendiz.create({ ...datos, createdBy });
     return aprendiz.toJSON();
   } catch (err) {
     if (esErrorDuplicado(err)) throw new AppError(409, "Ya existe un aprendiz con ese documento");

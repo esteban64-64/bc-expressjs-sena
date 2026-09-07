@@ -17,12 +17,23 @@ export async function obtenerPorId(id: string): Promise<unknown> {
   return repositorio.obtenerPorId(id);
 }
 
-export async function crear(datos: CrearAprendizInput): Promise<unknown> {
+export async function crear(datos: CrearAprendizInput, creadoPor: string): Promise<unknown> {
   await verificarProgramaExiste(datos.programa);
-  return repositorio.crear(datos);
+  return repositorio.crear(datos, creadoPor);
 }
 
-export async function actualizar(id: string, datos: ActualizarAprendizInput): Promise<unknown> {
+export async function actualizar(
+  id: string,
+  datos: ActualizarAprendizInput,
+  solicitanteId: string,
+  solicitanteRol: string
+): Promise<unknown> {
+  const existente = (await repositorio.obtenerPorId(id)) as { createdBy: string };
+
+  if (solicitanteRol !== "admin" && existente.createdBy !== solicitanteId) {
+    throw new AppError(403, "Solo puedes editar los aprendices que tú registraste");
+  }
+
   if (datos.programa) {
     await verificarProgramaExiste(datos.programa);
   }

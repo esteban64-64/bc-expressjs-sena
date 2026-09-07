@@ -1,43 +1,57 @@
-# Evidencia de ejecución — Semana 07
+# Evidencia de ejecución — Semana 08
 
-Ejecutado el 2026-09-06 contra una instancia real de MongoDB en
-`localhost:27017`, con `JWT_ACCESS_SECRET` y `JWT_REFRESH_SECRET`
-distintos, siguiendo el flujo completo indicado en el spec.
+Ejecutado el 2026-09-06 contra MongoDB real, con usuarios demo creados por
+`pnpm seed` (`admin@sena.edu.co` rol `admin`, `instructor@sena.edu.co` rol
+`user`, password `Demo1234` para ambos).
 
-| Paso | Petición | Resultado |
-|---|---|---|
-| 1 | `GET /api/v1/apprentices` (sin cookie) | `401` — `No autenticado — token no encontrado` |
-| 2 | `POST /api/v1/auth/register` | `201` |
-| 3 | `POST /api/v1/auth/register` (mismo email) | `409 Conflict` |
-| 4 | `POST /api/v1/auth/login` | `200`, cookies `accessToken` (HttpOnly, path `/`) y `refreshToken` (HttpOnly, path `/api/v1/auth`) |
-| 5 | `GET /api/v1/auth/me` (con cookie) | `200` |
-| 6 | `GET /api/v1/apprentices?limit=2` (con cookie) | `200` |
-| 7 | `POST /api/v1/apprentices` (con cookie) | `201` |
-| 8 | `PATCH /api/v1/apprentices/:id` (con cookie) | `200` |
-| 9 | `DELETE /api/v1/apprentices/:id` (con cookie) | `204` |
-| 10 | `POST /api/v1/auth/refresh` | `200` — nuevas cookies (rotación) |
-| 11 | `POST /api/v1/auth/logout` | `200` — cookies limpiadas |
-| 12 | `POST /api/v1/auth/refresh` (después de logout) | `401` — refresh token ya no disponible |
-
-## Cookies emitidas en login (formato Netscape, valores JWT reales omitidos parcialmente)
+## Headers de seguridad (Helmet + rate limit) — `GET /health`
 
 ```
-#HttpOnly_localhost  FALSE  /api/v1/auth  FALSE  <exp>  refreshToken  eyJhbGciOi...
-#HttpOnly_localhost  FALSE  /             FALSE  <exp>  accessToken   eyJhbGciOi...
+X-Content-Type-Options: nosniff
+X-Frame-Options: SAMEORIGIN
+RateLimit-Policy: 100;w=900
+RateLimit: limit=100, remaining=99, reset=900
 ```
 
-Ambas cookies llevan el flag `HttpOnly` (confirmado por el prefijo
-`#HttpOnly_` que agrega curl al parsear el header `Set-Cookie`) — nunca
-son accesibles desde JavaScript del lado del cliente.
+## Flujo RBAC
 
-## Checklist de criterios de seguridad obligatorios
-
-| Criterio | Cumple |
+| Petición | Resultado |
 |---|---|
-| Contraseñas hasheadas con `bcrypt.hash()` (10 salt rounds) | ✅ `auth.servicio.ts` |
-| `JWT_ACCESS_SECRET` ≠ `JWT_REFRESH_SECRET` | ✅ variables separadas en `.env` |
-| Tokens solo en cookies HttpOnly (nunca en el body ni localStorage) | ✅ confirmado arriba |
-| Refresh token hasheado en DB (nunca en claro) | ✅ `bcrypt.hash(refreshToken, ...)` antes de `updateRefreshToken` |
-| Rotación de refresh token en cada `/refresh` | ✅ paso 10, nuevo hash reemplaza al anterior |
-| Todas las rutas de `apprentices` protegidas con `authMiddleware` | ✅ `router.use(authMiddleware)` en `aprendices.rutas.ts` |
-| Sin secrets hardcodeados (solo en `.env`) | ✅ `.env` está en `.gitignore`, solo `.env.example` con placeholders |
+| `GET /api/v1/apprentices` sin cookie | `401` |
+| Login `instructor@sena.edu.co` (rol `user`) | `200` |
+| Login `admin@sena.edu.co` (rol `admin`) | `200` |
+| `PATCH` de un aprendiz **registrado por el propio instructor** | `200` |
+| `DELETE` por `instructor` (no es admin) | `403 Forbidden — Roles requeridos: admin` |
+| `DELETE` por `admin` | `204` |
+| Registro de un segundo usuario `otro@sena.edu.co` (rol `user` por defecto) | `201` |
+| `PATCH` de `otro@sena.edu.co` sobre un aprendiz que **no registró** (es de `instructor`) | `403 Forbidden — Solo puedes editar los aprendices que tú registraste` |
+
+## CORS con whitelist
+
+| Origen | Resultado |
+|---|---|
+| `http://evil.com` | Bloqueado (`CORS bloqueado: origen ... no permitido`, sin header `Access-Control-Allow-Origin`) |
+| `http://localhost:5173` (en la whitelist) | Permitido — `Access-Control-Allow-Origin: http://localhost:5173` |
+
+## Sanitización NoSQL
+
+`POST /api/v1/auth/login` con `password: { "$ne": null }` (intento clásico
+de bypass de autenticación vía operador Mongo) → `400 Bad Request` por Zod
+(`password` debe ser `string`, no `object`) — nunca llega a construir una
+query Mongo con el operador.
+
+## Nota técnica — incompatibilidad `express-mongo-sanitize` + Express 5
+
+El middleware por defecto de `express-mongo-sanitize@2.2.0` hace
+internamente `req.query = target` para "reemplazar" el query sanitizado.
+En Express 5, `req.query` es un **getter sin setter**, así que esa
+reasignación lanza en cada petición:
+
+```
+Cannot set property query of #<IncomingMessage> which has only a getter
+```
+
+Se reemplazó por `src/middlewares/sanitizar.ts`, que usa la función pura
+`sanitize()` de la misma librería (limpia el objeto **en el sitio**, sin
+reasignar `req.body`/`req.params`/`req.query`). Mismo resultado de
+sanitización, compatible con Express 5.

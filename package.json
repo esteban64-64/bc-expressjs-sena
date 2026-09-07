@@ -1,7 +1,7 @@
 {
-  "name": "semana07-sena-autenticacion-jwt",
+  "name": "semana08-sena-rbac-seguridad",
   "version": "1.0.0",
-  "description": "Semana 07 - Autenticación JWT completa (SENA Centro de Formación)",
+  "description": "Semana 08 - API segura con RBAC y capas de seguridad (SENA Centro de Formación)",
   "engines": {
     "node": ">=22.0.0"
   },
@@ -22,7 +22,10 @@
     "dotenv": "16.4.7",
     "bcrypt": "5.1.1",
     "cookie-parser": "1.4.7",
-    "jsonwebtoken": "9.0.2"
+    "jsonwebtoken": "9.0.2",
+    "helmet": "8.1.0",
+    "express-rate-limit": "8.2.1",
+    "express-mongo-sanitize": "2.2.0"
   },
   "devDependencies": {
     "@types/cors": "2.8.19",

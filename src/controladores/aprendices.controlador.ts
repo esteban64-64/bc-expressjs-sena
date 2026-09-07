@@ -1,5 +1,6 @@
 import type { Request, Response, NextFunction } from "express";
 import * as servicio from "../servicios/aprendices.servicio.js";
+import { AppError } from "../errors/AppError.js";
 import {
   crearAprendizSchema,
   actualizarAprendizSchema,
@@ -37,12 +38,16 @@ export async function obtenerPorId(req: Request, res: Response, next: NextFuncti
 
 export async function crear(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
+    if (!req.user) {
+      next(new AppError(401, "No autenticado"));
+      return;
+    }
     const parsed = crearAprendizSchema.safeParse(req.body);
     if (!parsed.success) {
       next(parsed.error);
       return;
     }
-    const aprendiz = await servicio.crear(parsed.data);
+    const aprendiz = await servicio.crear(parsed.data, req.user.sub);
     res.status(201).json({ data: aprendiz });
   } catch (err) {
     next(err);
@@ -51,6 +56,10 @@ export async function crear(req: Request, res: Response, next: NextFunction): Pr
 
 export async function actualizar(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
+    if (!req.user) {
+      next(new AppError(401, "No autenticado"));
+      return;
+    }
     const parsedParams = idParamSchema.safeParse(req.params);
     if (!parsedParams.success) {
       next(parsedParams.error);
@@ -61,7 +70,12 @@ export async function actualizar(req: Request, res: Response, next: NextFunction
       next(parsedBody.error);
       return;
     }
-    const aprendiz = await servicio.actualizar(parsedParams.data.id, parsedBody.data);
+    const aprendiz = await servicio.actualizar(
+      parsedParams.data.id,
+      parsedBody.data,
+      req.user.sub,
+      req.user.role as string
+    );
     res.status(200).json({ data: aprendiz });
   } catch (err) {
     next(err);
