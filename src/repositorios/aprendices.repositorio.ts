@@ -49,6 +49,9 @@ export async function crear(datos: CrearAprendizInput, createdBy: string): Promi
   } catch (err) {
     if (esErrorDuplicado(err)) throw new AppError(409, "Ya existe un aprendiz con ese documento");
     if (err instanceof mongoose.Error.CastError) throw new AppError(400, "programa debe ser un ObjectId válido");
+    // Model.create() valida antes de castear: un `programa` mal formado
+    // llega aquí envuelto en ValidationError, no como CastError directo.
+    if (err instanceof mongoose.Error.ValidationError) throw new AppError(400, err.message);
     throw err;
   }
 }

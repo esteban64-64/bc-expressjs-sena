@@ -1,59 +1,77 @@
-# Semana 8 — API Segura con RBAC y Capas de Seguridad (SENA Centro de Formación)
+# Semana 9 — Testing con Jest y Supertest (SENA Centro de Formación)
 
-Sobre la autenticación JWT de la semana 07, se agregan las capas de
-seguridad completas: Helmet, rate limiting diferenciado, CORS con
-whitelist, sanitización de entradas y RBAC con roles (`user`/`admin`) más
-verificación de propietario.
+Suite completa de tests para la API construida en las semanas 06-08
+(MongoDB/Mongoose, JWT, RBAC y seguridad): unit tests de los servicios con
+mocks, integration tests de las rutas con Supertest + MongoDB Memory
+Server, y cobertura ≥ 80% (statements/functions/lines) y ≥ 70% (branches).
 
 **Dominio**: SENA Centro de Formación
-**Recurso protegido**: `Aprendiz` — `/api/v1/apprentices`
+**Recurso principal probado**: `Aprendiz` (`aprendices.servicio.ts`, rutas `/api/v1/apprentices`)
 
-## Roles y permisos
-
-| Rol | Puede |
-|---|---|
-| `user` (ej. un instructor) | Ver, crear aprendices; editar (`PATCH`) **solo los que él registró** (`createdBy`) |
-| `admin` | Todo lo anterior + editar cualquier aprendiz + **eliminar** cualquiera |
-
-> Decisión de diseño: los datos de aprendices son información personal
-> (nombre, documento) — **ninguna ruta de `apprentices` es pública**, a
-> diferencia del ejemplo genérico del spec. `Programa` (catálogo, semana
-> 06) sigue público, fuera del alcance de esta semana.
-
-## Endpoints
-
-| Método | Ruta | Acceso | Status |
-|--------|------|--------|--------|
-| GET | `/api/v1/apprentices` | Autenticado | 200 / 401 |
-| GET | `/api/v1/apprentices/:id` | Autenticado | 200 / 401 / 404 |
-| POST | `/api/v1/apprentices` | Autenticado | 201 / 401 / 400 / 409 |
-| PATCH | `/api/v1/apprentices/:id` | Autenticado + dueño **o** admin | 200 / 401 / 403 / 404 |
-| DELETE | `/api/v1/apprentices/:id` | Autenticado + **admin** | 204 / 401 / 403 / 404 |
-| GET | `/api/v1/users/dashboard` | Autenticado | 200 / 401 |
-| POST | `/api/v1/auth/register`, `/login` | Público, con rate limit estricto (5/15min) | — |
-
-## Capas de seguridad (`src/config/security.ts`, `src/aplicacion.ts`)
-
-1. **Helmet** — headers de seguridad en todas las respuestas (`X-Content-Type-Options`, `X-Frame-Options`, etc.).
-2. **Rate limiting** — `globalLimiter` (100 req/15min, todas las rutas) y `authLimiter` (5 req/15min, solo `/auth/register` y `/auth/login`, protección contra fuerza bruta).
-3. **CORS con whitelist** — solo `http://localhost:5173` y `http://localhost:3001` (nunca `cors()` sin opciones ni `origin: '*'`), con `credentials: true` para las cookies HttpOnly.
-4. **Sanitización NoSQL** — `src/middlewares/sanitizar.ts` limpia `body`/`params`/`query` de claves con `$` o `.` antes de llegar a las rutas (ver nota técnica abajo sobre por qué no se usa el middleware por defecto).
-5. **RBAC** — `authMiddleware` (semana 07) + `requireRole('admin')` (nuevo) para `DELETE`; verificación de propietario (`createdBy`) en `src/servicios/aprendices.servicio.ts` para `PATCH`.
-6. **Errores sin stack trace en producción** — heredado del `errorHandler` de semana 04: en `NODE_ENV=production` el 500 genérico no expone `err.message`.
-
-## Instalación y ejecución
+## Comandos
 
 ```bash
-docker compose up -d
 pnpm install
-cp .env.example .env    # agrega JWT_ACCESS_SECRET / JWT_REFRESH_SECRET
-pnpm seed                # crea admin@sena.edu.co / instructor@sena.edu.co (password: Demo1234)
-pnpm dev
+pnpm test              # ejecutar todos los tests
+pnpm test:watch        # modo watch
+pnpm test:coverage     # reporte de cobertura → coverage/lcov-report/index.html
 ```
+
+No requiere Docker ni MongoDB corriendo — `mongodb-memory-server` descarga
+y levanta un `mongod` real y efímero por cada suite de integración.
+
+## Qué se probó
+
+### Unit tests (`src/servicios/__tests__/`)
+
+- **`aprendices.servicio.test.ts`** (13 tests): `listarPaginado`,
+  `obtenerPorId`, `crear` (valida que el programa exista), `actualizar`
+  (dueño ✅ / admin ✅ / ni dueño ni admin → 403 / 404 propagado / nuevo
+  programa inexistente → 400), `eliminar`. Repositorio y modelo `Programa`
+  mockeados con `jest.mock()`.
+- **`auth.servicio.test.ts`** (12 tests): `register`, `login`, `refresh`
+  (rotación, token inválido, sesión no válida, hash no coincide),
+  `logout`, `getMe`. `bcrypt`, `jwt.ts` y el repositorio de usuarios
+  mockeados — nunca toca una base de datos real ni corre bcrypt real.
+
+### Integration tests (`src/__tests__/`)
+
+- **`aprendices.routes.test.ts`** (19 tests): el ciclo completo pedido por
+  el spec — `GET` sin/con auth, `POST` válido/401/400/409/400 (programa
+  inexistente), `GET /:id` 200/404/400, `PATCH` dueño/no-dueño(403)/404,
+  `DELETE` admin(204)/no-admin(403)/404 — más un smoke test del CRUD
+  público de `Programa`.
+- **`auth.routes.test.ts`** (16 tests): register/login/duplicado/password
+  débil/credenciales inválidas, y el flujo `login → /me → /refresh
+  (rotación) → /logout → /refresh` (401, ya invalidado) — igual que se
+  verificó manualmente con curl en la semana 07.
+- **`programas.routes.test.ts`** (7 tests): duplicado (409), body inválido
+  (400), ID inválido (400), actualizar/eliminar inexistente (404).
+
+### Otros unit tests dirigidos a cobertura de ramas
+
+- **`repositorios/__tests__/aprendices.repositorio.test.ts`**: llama los
+  repositorios **directamente** (sin pasar por Zod) para forzar
+  `CastError`/`ValidationError` reales de Mongoose — ver el hallazgo real
+  documentado en `docs/evidencia.md`.
+- **`middlewares/__tests__/{requireRole,errorHandler}.test.ts`** y
+  **`utils/__tests__/jwt.test.ts`**: ramas defensivas (sin `req.user`, sin
+  secret configurado, `isOperational: false`, mensaje de error en
+  desarrollo vs. producción) que la API nunca alcanza por HTTP porque
+  otras capas ya las bloquean antes.
+
+## `clearMocks` y limpieza de estado entre tests
+
+- `jest.config.cjs`: `clearMocks: true` (todos los `jest.fn()` se
+  resetean automáticamente entre tests).
+- Integration tests: `afterEach` limpia solo la colección bajo prueba
+  (ej. `Aprendiz.deleteMany({})`), preservando los usuarios/tokens de
+  fixture creados una vez en `beforeAll`; `afterAll` desconecta Mongo y
+  detiene el `MongoMemoryServer`.
 
 ## Ver [`docs/evidencia.md`](./docs/evidencia.md)
 
-Headers de Helmet/rate-limit, flujo RBAC completo (401 → 200 dueño → 403
-no-dueño → 403 no-admin → 204 admin), CORS bloqueando un origen no
-permitido, e intento de inyección NoSQL en login rechazado por Zod antes
-de tocar la base de datos — todo probado con curl contra MongoDB real.
+Tabla de cobertura completa, el bug real que reveló escribir los tests
+(`ValidationError` no manejado en `aprendices.repositorio.crear()`), y la
+nota técnica sobre cómo se hizo funcionar `jest.mock()` clásico en un
+proyecto ESM/NodeNext sin reescribir todo a `jest.unstable_mockModule`.

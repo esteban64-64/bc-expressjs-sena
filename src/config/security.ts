@@ -1,12 +1,19 @@
 import rateLimit from "express-rate-limit";
 import type { CorsOptions } from "cors";
 
+// En tests, una sola suite de integración puede hacer más llamadas a
+// /auth/register|login de las que un usuario real haría en 15 minutos
+// (múltiples usuarios de fixture en beforeAll) — el rate limit se
+// desactiva solo en NODE_ENV=test, nunca en development/production.
+const esEntornoDeTest = process.env.NODE_ENV === "test";
+
 // Limiter global — todos los endpoints: 100 req / 15 min
 export const globalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 100,
   standardHeaders: "draft-7",
   legacyHeaders: false,
+  skip: () => esEntornoDeTest,
   message: { error: "Demasiadas peticiones, intenta de nuevo más tarde" },
 });
 
@@ -16,6 +23,7 @@ export const authLimiter = rateLimit({
   max: 5,
   standardHeaders: "draft-7",
   legacyHeaders: false,
+  skip: () => esEntornoDeTest,
   message: { error: "Demasiados intentos de inicio de sesión, intenta más tarde" },
 });
 

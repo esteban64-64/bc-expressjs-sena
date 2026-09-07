@@ -1,57 +1,88 @@
-# Evidencia de ejecución — Semana 08
+# Evidencia de ejecución — Semana 09
 
-Ejecutado el 2026-09-06 contra MongoDB real, con usuarios demo creados por
-`pnpm seed` (`admin@sena.edu.co` rol `admin`, `instructor@sena.edu.co` rol
-`user`, password `Demo1234` para ambos).
-
-## Headers de seguridad (Helmet + rate limit) — `GET /health`
+Ejecutado el 2026-09-06 con `pnpm test:coverage`.
 
 ```
-X-Content-Type-Options: nosniff
-X-Frame-Options: SAMEORIGIN
-RateLimit-Policy: 100;w=900
-RateLimit: limit=100, remaining=99, reset=900
+Test Suites: 9 passed, 9 total
+Tests:       91 passed, 91 total
 ```
 
-## Flujo RBAC
+## Cobertura global (umbral exigido: 80/70/80/80)
 
-| Petición | Resultado |
-|---|---|
-| `GET /api/v1/apprentices` sin cookie | `401` |
-| Login `instructor@sena.edu.co` (rol `user`) | `200` |
-| Login `admin@sena.edu.co` (rol `admin`) | `200` |
-| `PATCH` de un aprendiz **registrado por el propio instructor** | `200` |
-| `DELETE` por `instructor` (no es admin) | `403 Forbidden — Roles requeridos: admin` |
-| `DELETE` por `admin` | `204` |
-| Registro de un segundo usuario `otro@sena.edu.co` (rol `user` por defecto) | `201` |
-| `PATCH` de `otro@sena.edu.co` sobre un aprendiz que **no registró** (es de `instructor`) | `403 Forbidden — Solo puedes editar los aprendices que tú registraste` |
+| Métrica | Cobertura | Umbral | Cumple |
+|---|---|---|---|
+| Statements | 93.11% | 80% | ✅ |
+| Branches | 75.53% | 70% | ✅ |
+| Functions | 98.68% | 80% | ✅ |
+| Lines | 94.02% | 80% | ✅ |
 
-## CORS con whitelist
+`servicios/`, `rutas/`, `modelos/`, `schemas/` y `errors/` están al 100% en
+las 4 métricas. Lo que queda por debajo del 100% son ramas de
+configuración por entorno difíciles de accionar sin duplicar setup
+(`config/logger.ts` con `NODE_ENV=development` vs producción) o guardas
+defensivas ya cubiertas por otro camino equivalente.
 
-| Origen | Resultado |
-|---|---|
-| `http://evil.com` | Bloqueado (`CORS bloqueado: origen ... no permitido`, sin header `Access-Control-Allow-Origin`) |
-| `http://localhost:5173` (en la whitelist) | Permitido — `Access-Control-Allow-Origin: http://localhost:5173` |
-
-## Sanitización NoSQL
-
-`POST /api/v1/auth/login` con `password: { "$ne": null }` (intento clásico
-de bypass de autenticación vía operador Mongo) → `400 Bad Request` por Zod
-(`password` debe ser `string`, no `object`) — nunca llega a construir una
-query Mongo con el operador.
-
-## Nota técnica — incompatibilidad `express-mongo-sanitize` + Express 5
-
-El middleware por defecto de `express-mongo-sanitize@2.2.0` hace
-internamente `req.query = target` para "reemplazar" el query sanitizado.
-En Express 5, `req.query` es un **getter sin setter**, así que esa
-reasignación lanza en cada petición:
+## Estructura de la suite
 
 ```
-Cannot set property query of #<IncomingMessage> which has only a getter
+src/
+├── servicios/__tests__/
+│   ├── aprendices.servicio.test.ts   (13 tests, unit — mocks del repositorio)
+│   └── auth.servicio.test.ts         (12 tests, unit — mocks de bcrypt/jwt/repo)
+├── repositorios/__tests__/
+│   └── aprendices.repositorio.test.ts (7 tests — CastError/ValidationError
+│                                        llamando el repositorio directo
+│                                        contra Mongo real, sin pasar por Zod)
+├── middlewares/__tests__/
+│   ├── requireRole.test.ts    (3 tests, unit)
+│   └── errorHandler.test.ts   (4 tests, unit)
+├── utils/__tests__/
+│   └── jwt.test.ts            (6 tests, unit — incluye ramas de secret faltante)
+└── __tests__/
+    ├── aprendices.routes.test.ts  (19 tests, integración — Supertest + MongoMemoryServer)
+    ├── auth.routes.test.ts        (16 tests, integración — flujo completo login→me→refresh→logout)
+    └── programas.routes.test.ts   (7 tests, integración)
 ```
 
-Se reemplazó por `src/middlewares/sanitizar.ts`, que usa la función pura
-`sanitize()` de la misma librería (limpia el objeto **en el sitio**, sin
-reasignar `req.body`/`req.params`/`req.query`). Mismo resultado de
-sanitización, compatible con Express 5.
+## Hallazgo real durante el desarrollo de los tests
+
+Escribir el test "crear debe lanzar AppError 400 cuando `programa` no es
+un ObjectId válido" (llamando `aprendices.repositorio.crear()` **directo**,
+sin pasar por el schema Zod que normalmente bloquea esto en la ruta HTTP)
+reveló un bug genuino: `Model.create()` de Mongoose envuelve un ObjectId
+mal formado en un `ValidationError`, no en un `CastError` directo — el
+`catch` del repositorio solo comprobaba `instanceof CastError`, así que
+este caso caía al `throw err` final y hubiera producido un 500 sin
+manejar. Se corrigió agregando `instanceof mongoose.Error.ValidationError`
+al `catch` de `crear()` en `src/repositorios/aprendices.repositorio.ts`.
+Por la vía HTTP normal esto es inalcanzable (Zod ya lo bloquea antes), pero
+es defensa en profundidad real para cualquier otro código que llame al
+repositorio directamente.
+
+## Nota técnica — Jest + ts-jest en un proyecto ESM (NodeNext)
+
+Todo el proyecto usa `"type": "module"` + `moduleResolution: "NodeNext"`
+desde la semana 01 (imports relativos con extensión `.js`, resueltos a los
+`.ts` reales). El soporte "oficial" de ESM de Jest 29 (`useESM` +
+`--experimental-vm-modules`) exige reescribir `jest.mock()` como
+`jest.unstable_mockModule()` con `import()` dinámico en cada test — mucho
+más fragil para un proyecto de bootcamp.
+
+En su lugar, `tsconfig.jest.json` extiende el `tsconfig.json` del proyecto
+pero fuerza `"module": "CommonJS"` (manteniendo `moduleResolution:
+"NodeNext"`, que es lo que permite que `./foo.js` siga resolviendo a
+`./foo.ts`). `ts-jest` transpila los tests a CommonJS con ese tsconfig, y
+`moduleNameMapper` (`^(\.{1,2}/.*)\.js$` → `$1`) le dice a Jest que ignore
+la extensión `.js` al resolver los `require()` resultantes. Con esto,
+`jest.mock()` clásico funciona exactamente igual que en un proyecto CJS,
+sin tocar una sola línea del código fuente de la aplicación (que sigue
+compilando y ejecutándose en ESM real con `tsx`).
+
+## Rate limiting en tests
+
+`src/config/security.ts` desactiva `globalLimiter`/`authLimiter` cuando
+`NODE_ENV=test` (`skip: () => process.env.NODE_ENV === "test"`). Sin esto,
+una sola suite de integración con varios usuarios de fixture en
+`beforeAll` agota el límite de 5 intentos/15min de `/auth/register` y
+`/auth/login` y los tests fallan con 429 en vez de los códigos esperados.
+No afecta a `development` ni `production`.
