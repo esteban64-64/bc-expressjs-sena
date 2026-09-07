@@ -14,7 +14,7 @@ export async function listar(req: Request, res: Response, next: NextFunction): P
       next(parsed.error);
       return;
     }
-    const resultado = await servicio.listarPaginado(parsed.data.page, parsed.data.limit);
+    const resultado = await servicio.listarPaginado(parsed.data.page, parsed.data.limit, parsed.data.search);
     res.status(200).json(resultado);
   } catch (err) {
     next(err);

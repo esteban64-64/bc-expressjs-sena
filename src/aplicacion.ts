@@ -2,6 +2,7 @@ import express, { type Request, type Response } from "express";
 import cors from "cors";
 import morgan from "morgan";
 import aprendicesRouter from "./rutas/aprendices.rutas.js";
+import programasRouter from "./rutas/programas.rutas.js";
 import { notFound } from "./middlewares/notFound.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import { morganStream } from "./config/logger.js";
@@ -14,6 +15,7 @@ app.use(express.json());
 app.use(morgan("dev", { stream: morganStream }));
 
 // Rutas
+app.use("/api/v1/programs", programasRouter);
 app.use("/api/v1/apprentices", aprendicesRouter);
 
 // Health check

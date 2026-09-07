@@ -1,118 +1,89 @@
-# Semana 5 — API con PostgreSQL y Prisma ORM (SENA Centro de Formación)
+# Semana 6 — API REST con MongoDB y Mongoose (SENA Centro de Formación)
 
-Migración de la API de aprendices desde almacenamiento en memoria (semana 04)
-a **PostgreSQL** usando **Prisma ORM**, con migraciones versionadas y seed
-idempotente.
+Migración de la persistencia de PostgreSQL/Prisma (semana 05) a **MongoDB +
+Mongoose**, con dos entidades relacionadas, `populate()`, paginación y
+manejo de errores de Mongo (`11000`, `CastError`).
 
 **Dominio**: SENA Centro de Formación
-**Recurso principal** (expuesto en la API): `Apprentice` (aprendiz)
-**Recurso secundario** (relación 1:N): `Program` (programa) — un programa
-tiene muchos aprendices
+**Entidad secundaria** (sin referencias): `Programa` — `/api/v1/programs`
+**Entidad principal** (referencia a `Programa`): `Aprendiz` — `/api/v1/apprentices`
 
 ## Modelo de datos
 
 ```
-Program (1) ──< (N) Apprentice
-  id, nombre, nivel, duracionMeses          id, nombreCompleto, documento (único),
-                                             ficha, estado, fechaIngreso,
-                                             promedioAcumulado, costoMatricula,
-                                             programId (FK)
+Programa (colección "programs")        Aprendiz (colección "apprentices")
+  nombre (único), nivel,          <──┐    nombreCompleto, documento (único),
+  duracionMeses                      └── programa: ObjectId ref Programa
+                                          ficha, estado, fechaIngreso,
+                                          promedioAcumulado, costoMatricula
 ```
-
-Toda PK/FK es `String @db.Uuid` (`@default(uuid())`), según la convención del
-bootcamp — nunca `Int @default(autoincrement())`.
 
 ## Estructura
 
 ```
-prisma/
-├── schema.prisma       # Modelos Program y Apprentice
-└── seed.ts             # 4 programas + 8 aprendices (idempotente)
 src/
-├── lib/prisma.ts             # Singleton de PrismaClient
-├── config/logger.ts          # Winston (heredado de semana 04)
+├── config/{logger,mongoose}.ts        # Winston + connectDB/disconnectDB
+├── modelos/{programa,aprendiz}.modelo.ts
 ├── errors/AppError.ts
 ├── middlewares/{errorHandler,notFound}.ts
-├── schemas/aprendiz.schema.ts   # Zod — programId validado como UUID
-├── repositorios/aprendices.repositorio.ts  # Prisma CRUD + P2002/P2003/P2025
-├── servicios/aprendices.servicio.ts
-├── controladores/aprendices.controlador.ts  # .safeParse() en los 5 handlers
-├── rutas/aprendices.rutas.ts
+├── schemas/{programa,aprendiz}.schema.ts
+├── repositorios/{programas,aprendices}.repositorio.ts  # 11000/CastError/404
+├── servicios/{programas,aprendices}.servicio.ts        # valida que el
+│                                                          programa exista
+├── controladores/{programas,aprendices}.controlador.ts # .safeParse()
+├── rutas/{programas,aprendices}.rutas.ts
 ├── aplicacion.ts
-└── servidor.ts
+├── servidor.ts       # connectDB() antes de listen
+└── semilla.ts        # inserta programas primero, luego aprendices
 ```
 
 ## Instalación y ejecución
 
-Requiere Docker (para PostgreSQL), Node 22+ y pnpm.
+Requiere MongoDB (Docker o instalación local), Node 22+ y pnpm.
 
 ```bash
-docker compose up -d                      # levanta PostgreSQL en :5432
+docker compose up -d              # levanta MongoDB en :27017
 pnpm install
 cp .env.example .env
-pnpm dlx prisma migrate dev --name init   # crea prisma/migrations/
-pnpm dlx prisma db seed                   # inserta programas + aprendices
-pnpm dev                                  # servidor en http://localhost:3000
+pnpm seed                         # 4 programas + 8 aprendices
+pnpm dev                          # servidor en http://localhost:3000
 ```
 
 ## Endpoints
 
+### Programas (secundaria)
+
 | Método | Ruta | Descripción | Status |
 |--------|------|-------------|--------|
-| GET | `/api/v1/apprentices?page=1&limit=10` | Listado paginado (incluye `program`) | 200 |
-| GET | `/api/v1/apprentices/:id` | Detalle con `program` | 200 / 404 |
-| POST | `/api/v1/apprentices` | Crear (Zod) | 201 / 400 / 409 |
+| GET | `/api/v1/programs` | Listar todos | 200 |
+| GET | `/api/v1/programs/:id` | Obtener por ID | 200 / 400 / 404 |
+| POST | `/api/v1/programs` | Crear | 201 / 400 / 409 |
+| PUT | `/api/v1/programs/:id` | Actualizar | 200 / 400 / 404 / 409 |
+| DELETE | `/api/v1/programs/:id` | Eliminar | 204 / 400 / 404 |
+
+### Aprendices (principal, con populate)
+
+| Método | Ruta | Descripción | Status |
+|--------|------|-------------|--------|
+| GET | `/api/v1/apprentices?page=1&limit=10&search=texto` | Paginado + `populate(programa)` | 200 |
+| GET | `/api/v1/apprentices/:id` | Con `programa` populado | 200 / 400 / 404 |
+| POST | `/api/v1/apprentices` | Valida que `programa` exista | 201 / 400 / 409 |
 | PUT | `/api/v1/apprentices/:id` | Actualizar | 200 / 400 / 404 / 409 |
-| DELETE | `/api/v1/apprentices/:id` | Eliminar | 204 / 404 |
-| GET | `/health` | Health check | 200 |
+| DELETE | `/api/v1/apprentices/:id` | Eliminar | 204 / 400 / 404 |
 
-### Ejemplo — crear aprendiz
+## Manejo de errores de Mongo/Mongoose
 
-```bash
-curl -X POST http://localhost:3000/api/v1/apprentices \
-  -H "Content-Type: application/json" \
-  -d '{
-    "nombreCompleto": "Nuevo Aprendiz",
-    "documento": "99999999",
-    "programId": "<uuid-de-un-program>",
-    "ficha": "2765412",
-    "estado": "activo",
-    "fechaIngreso": "2025-04-01",
-    "promedioAcumulado": 4.0,
-    "costoMatricula": 1200000
-  }'
-```
+| Situación | Respuesta |
+|---|---|
+| Código Mongo `11000` (campo único duplicado: `documento` o `nombre`) | `409 AppError` |
+| `CastError` (ObjectId con formato inválido) | `400 AppError` (además el schema Zod ya rechaza formatos inválidos antes de llegar aquí) |
+| `programa` con formato válido pero que no existe | `400 AppError` (verificado en el servicio con `Programa.exists()`) |
+| Documento no encontrado (`findById`/`findByIdAndUpdate`/`findByIdAndDelete` → `null`) | `404 AppError` |
 
-Respuesta 201:
-```json
-{
-  "data": {
-    "id": "b6a1...uuid",
-    "nombreCompleto": "Nuevo Aprendiz",
-    "documento": "99999999",
-    "ficha": "2765412",
-    "estado": "activo",
-    "fechaIngreso": "2025-04-01T00:00:00.000Z",
-    "promedioAcumulado": 4,
-    "costoMatricula": 1200000,
-    "programId": "...",
-    "createdAt": "...",
-    "updatedAt": "..."
-  }
-}
-```
-
-## Manejo de errores de Prisma
-
-| Código Prisma | Situación | Respuesta |
-|---|---|---|
-| `P2002` | `documento` duplicado | `409 AppError` |
-| `P2003` | `programId` no existe (FK inválida) | `400 AppError` |
-| `P2025` | Actualizar/eliminar un `id` inexistente | `404 AppError` |
-
-Todos pasan por el `errorHandler` global (heredado de semana 04, sin cambios).
+Todos pasan por el `errorHandler` global (heredado, sin cambios).
 
 ## Ver [`docs/evidencia.md`](./docs/evidencia.md)
 
-Logs reales de `prisma migrate dev`, `prisma db seed` y capturas de los 5
-endpoints contra la base de datos levantada localmente.
+Logs reales de `pnpm seed` y de probar los 5 endpoints de `apprentices`
+(incluyendo `populate`, 400 por `programa` inválido y 409 por duplicado)
+contra una instancia real de MongoDB.

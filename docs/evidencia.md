@@ -1,61 +1,56 @@
-# Evidencia de ejecución — Semana 05
+# Evidencia de ejecución — Semana 06
 
-Ejecutado el 2026-09-06 contra un PostgreSQL 18 real en `localhost:5432`
-(base `sena_centro_formacion`, usuario `sena`).
+Ejecutado el 2026-09-06 contra una instancia real de MongoDB en
+`localhost:27017` (base `sena_centro_formacion`).
 
-## `prisma migrate dev --name init`
-
-```
-Datasource "db": PostgreSQL database "sena_centro_formacion", schema "public" at "localhost:5432"
-
-Applying migration `20260907005045_init`
-
-The following migration(s) have been created and applied from new schema changes:
-
-migrations/
-  └─ 20260907005045_init/
-    └─ migration.sql
-
-Your database is now in sync with your schema.
-```
-
-## `prisma db seed`
+## `pnpm seed`
 
 ```
-🌱 Iniciando seed...
-✅ 4 programas creados
-✅ 8 aprendices creados
+🍃 MongoDB conectado
+Colecciones limpiadas
+✅ 4 programas insertados
+✅ 8 aprendices insertados
+Semilla completada
 ```
 
-## Prueba de los 5 endpoints (curl)
+## Pruebas de los endpoints (curl)
 
 | Prueba | Resultado |
 |---|---|
-| `GET /api/v1/apprentices?page=1&limit=3` | `200`, incluye `program` populado |
+| `GET /api/v1/programs` | `200` |
+| `GET /api/v1/apprentices?page=1&limit=2&search=Ruiz` | `200`, con `programa` populado |
 | `POST /api/v1/apprentices` (válido) | `201` |
 | `POST /api/v1/apprentices` (documento duplicado) | `409 Conflict` |
-| `POST /api/v1/apprentices` (`programId` inexistente) | `400 Bad Request` |
-| `PUT /api/v1/apprentices/:id` | `200` |
-| `GET /api/v1/apprentices/:id` (id inexistente) | `404 Not Found` |
-| `DELETE /api/v1/apprentices/:id` | `204 No Content` |
+| `POST /api/v1/apprentices` (`programa` con formato válido pero inexistente) | `400 Bad Request` |
+| `GET /api/v1/apprentices/:id` (id con formato inválido) | `400` (Zod, antes de llegar a Mongo) |
+| `PUT /api/v1/apprentices/:id` | `200`, con `programa` populado |
+| `DELETE /api/v1/apprentices/:id` | `204` |
+| `GET` del aprendiz recién eliminado | `404 Not Found` |
+| `POST /api/v1/programs` (nombre duplicado, vía Zod) | rechazado |
+| `POST /api/v1/programs` (válido) | `201` |
+| `PUT /api/v1/programs/:id` | `200`, sin warning de deprecación de Mongoose |
 
-### GET listado (con `program` populado)
+### GET con `populate` + `search`
 
 ```json
 {
   "data": [
     {
-      "id": "b6dbf8f5-6dbc-4aca-86d8-609191716d54",
-      "nombreCompleto": "Esteban Quintero",
-      "documento": "1020345678",
+      "_id": "6a9e0c2ca7fd77df533c23ba",
+      "nombreCompleto": "Valentina Ruiz",
+      "documento": "1010234567",
       "estado": "activo",
-      "programId": "db1d98b3-9275-43f9-82b3-471761812206",
-      "program": { "id": "db1d98b3-9275-43f9-82b3-471761812206", "nombre": "Análisis y Desarrollo de Software", "nivel": "Tecnólogo" }
+      "programa": {
+        "_id": "6a9e0c2ca7fd77df533c23b6",
+        "nombre": "Análisis y Desarrollo de Software",
+        "nivel": "Tecnólogo",
+        "duracionMeses": 24
+      }
     }
   ],
-  "total": 8,
+  "total": 1,
   "page": 1,
-  "limit": 3
+  "totalPages": 1
 }
 ```
 
@@ -65,14 +60,16 @@ Your database is now in sync with your schema.
 { "error": "Conflict", "message": "Ya existe un aprendiz con ese documento" }
 ```
 
-### POST con `programId` inexistente → 400
+### POST con `programa` inexistente (formato válido, ObjectId no existe) → 400
 
 ```json
-{ "error": "Bad Request", "message": "El programId no corresponde a un programa existente" }
+{ "error": "Bad Request", "message": "El programa indicado no existe" }
 ```
 
-### DELETE → 204, luego GET del mismo id → 404
+## Nota técnica
 
-```json
-{ "error": "Not Found", "message": "Aprendiz no encontrado" }
-```
+Se corrigió `{ new: true }` → `{ returnDocument: "after" }` en
+`findByIdAndUpdate` de ambos repositorios: Mongoose 9.4.1 marca `new` como
+deprecado en favor de `returnDocument`. Verificado que el warning
+desaparece y el comportamiento (devolver el documento actualizado) se
+mantiene igual.

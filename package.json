@@ -1,7 +1,7 @@
 {
-  "name": "semana05-sena-postgresql-prisma",
+  "name": "semana06-sena-mongodb-mongoose",
   "version": "1.0.0",
-  "description": "Semana 05 - API con PostgreSQL y Prisma ORM (SENA Centro de Formación)",
+  "description": "Semana 06 - API REST con MongoDB y Mongoose (SENA Centro de Formación)",
   "engines": {
     "node": ">=22.0.0"
   },
@@ -10,25 +10,22 @@
     "dev": "tsx src/servidor.ts",
     "build": "tsc --noEmit",
     "start": "node dist/src/servidor.js",
-    "postinstall": "prisma generate"
-  },
-  "prisma": {
-    "seed": "tsx prisma/seed.ts"
+    "seed": "tsx src/semilla.ts"
   },
   "dependencies": {
-    "@prisma/client": "6.8.2",
+    "mongoose": "9.4.1",
     "express": "5.2.1",
     "cors": "2.8.6",
     "morgan": "1.11.0",
     "winston": "3.19.0",
-    "zod": "3.25.76"
+    "zod": "3.25.76",
+    "dotenv": "16.4.7"
   },
   "devDependencies": {
     "@types/cors": "2.8.19",
     "@types/express": "5.0.6",
     "@types/morgan": "1.9.10",
     "@types/node": "22.20.1",
-    "prisma": "6.8.2",
     "tsx": "4.23.12",
     "typescript": "5.9.3"
   },

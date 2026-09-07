@@ -1,16 +1,15 @@
 services:
-  db:
-    image: postgres:16-alpine
-    container_name: sena-centro-formacion-db
+  mongo:
+    image: mongo:7
+    container_name: sena-centro-formacion-mongo
     environment:
-      POSTGRES_USER: sena
-      POSTGRES_PASSWORD: sena123
-      POSTGRES_DB: sena_centro_formacion
+      MONGO_INITDB_ROOT_USERNAME: sena
+      MONGO_INITDB_ROOT_PASSWORD: sena123
     ports:
-      - "5432:5432"
+      - "27017:27017"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - mongo_data:/data/db
     restart: unless-stopped
 
 volumes:
-  postgres_data:
+  mongo_data:
